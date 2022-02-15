@@ -22,7 +22,7 @@ WINNER_FONT = pygame.font.SysFont('comicsans', 100)
 COUNTDOWN_FONT = pygame.font.SysFont('comicsans', 60)
 
 VEL = 5
-BULLET_VEL = 7
+BULLET_VEL = 10
 MAX_BULLETS = 8
 FPS = 60
 SPACE_SHIP_WIDTH, SPACE_SHIP_HEIGHT = 55, 40
