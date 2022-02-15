@@ -19,6 +19,7 @@ BULLET_FIRED_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'Gun+Silencer.mp3
 
 HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
 WINNER_FONT = pygame.font.SysFont('comicsans', 100)
+COUNTDOWN_FONT = pygame.font.SysFont('comicsans', 60)
 
 VEL = 5
 BULLET_VEL = 7
@@ -58,11 +59,24 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_hea
     pygame.display.update()
 
 
-def draw_winner(text):
-    draw_text = WINNER_FONT.render(text, True, WHITE)
-    WIN.blit(draw_text, (WIDTH//2 - draw_text.get_width()//2, HEIGHT//2 - draw_text.get_height()//2))
-    pygame.display.update()
-    pygame.time.delay(5000)
+def draw_winner(text, red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
+    countdown = True
+    countdown_time = 5
+
+    while countdown:
+        draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
+        draw_text = WINNER_FONT.render(text, True, WHITE)
+        WIN.blit(draw_text, (WIDTH // 2 - draw_text.get_width() // 2, HEIGHT // 2 - draw_text.get_height() // 2))
+
+        countdown_text = COUNTDOWN_FONT.render(str(countdown_time), True, WHITE)
+        WIN.blit(countdown_text, (WIDTH//2 - countdown_text.get_width()//2, HEIGHT//2 + draw_text.get_height()//2))
+        pygame.display.update()
+
+        countdown_time -= 1
+        if countdown_time == 0:
+            countdown = False
+        pygame.time.delay(1000)
+
 
 
 def handle_yellow_movement(keys_pressed, yellow):
@@ -158,7 +172,7 @@ def main():
             winner_text = 'Red Wins!'
 
         if winner_text:
-            draw_winner(winner_text)
+            draw_winner(winner_text, red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
             break
 
         keys_pressed = pygame.key.get_pressed()
