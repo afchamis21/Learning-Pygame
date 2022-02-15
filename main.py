@@ -23,7 +23,7 @@ COUNTDOWN_FONT = pygame.font.SysFont('comicsans', 60)
 
 VEL = 5
 BULLET_VEL = 7
-MAX_BULLETS = 3
+MAX_BULLETS = 5
 FPS = 60
 SPACE_SHIP_WIDTH, SPACE_SHIP_HEIGHT = 55, 40
 
@@ -76,7 +76,6 @@ def draw_winner(text, red, yellow, red_bullets, yellow_bullets, red_health, yell
         if countdown_time == 0:
             countdown = False
         pygame.time.delay(1000)
-
 
 
 def handle_yellow_movement(keys_pressed, yellow):
