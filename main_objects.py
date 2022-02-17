@@ -27,18 +27,23 @@ class Spaceship:
                     pygame.transform.scale(spaceship_image, (width, height)), rotation)
                 self.yellow = pygame.Rect(x_pos, y_pos, height, width)
 
-        self.x = x_pos
         self.initial_x = x_pos
-        self.y = y_pos
         self.initial_y = y_pos
+
+        self.x = x_pos
+        self.y = y_pos
+
         self.color = color
+
+        self.bullet_speed = 8
         self.speed = speed
         self.width = height
         self.height = width
-        self.parent = parent
+        self.health = 10
+
+        self.window = parent
         self.bullet_limit = 5
         self.bullet_list = []
-        self.health = 10
 
     def reset_all(self):
         self.x = self.initial_x
@@ -49,11 +54,11 @@ class Spaceship:
     def handle_movement(self, keys_pressed):
         match self.color:
             case 'red':
-                if keys_pressed[pygame.K_LEFT] and self.x - self.speed > self.parent.border.x + self.parent.border.width:  # LEFT
+                if keys_pressed[pygame.K_LEFT] and self.x - self.speed > self.window.border.x + self.window.border.width:  # LEFT
                     self.red.x -= self.speed
                     self.x = self.red.x
 
-                if keys_pressed[pygame.K_RIGHT] and self.x + self.speed < self.parent.width - self.width:  # RIGHT
+                if keys_pressed[pygame.K_RIGHT] and self.x + self.speed < self.window.width - self.width:  # RIGHT
                     self.red.x += self.speed
                     self.x = self.red.x
         
@@ -61,7 +66,7 @@ class Spaceship:
                     self.red.y -= self.speed
                     self.y = self.red.y
 
-                if keys_pressed[pygame.K_DOWN] and self.y + self.speed < self.parent.height - self.height:  # DOWN
+                if keys_pressed[pygame.K_DOWN] and self.y + self.speed < self.window.height - self.height:  # DOWN
                     self.red.y += self.speed
                     self.y = self.red.y
             
@@ -70,7 +75,7 @@ class Spaceship:
                     self.yellow.x -= self.speed
                     self.x = self.yellow.x
 
-                if keys_pressed[pygame.K_d] and self.x + self.speed < self.parent.border.x - self.width:  # RIGHT
+                if keys_pressed[pygame.K_d] and self.x + self.speed < self.window.border.x - self.width:  # RIGHT
                     self.yellow.x += self.speed
                     self.x = self.yellow.x
         
@@ -78,9 +83,31 @@ class Spaceship:
                     self.yellow.y -= self.speed
                     self.y = self.yellow.y
 
-                if keys_pressed[pygame.K_s] and self.y + self.speed < self.parent.height - self.height:  # DOWN
+                if keys_pressed[pygame.K_s] and self.y + self.speed < self.window.height - self.height:  # DOWN
                     self.yellow.y += self.speed
                     self.y = self.yellow.y
+
+    def handle_bullets(self):
+        match self.color:
+            case 'yellow':
+                for bullet in self.bullet_list:
+                    bullet.x += self.bullet_speed
+                    if bullet.x > self.window.width:
+                        self.bullet_list.remove(bullet)
+
+                    if self.window.dependencies['red_spaceship'].red.colliderect(bullet):
+                        pygame.event.post(pygame.event.Event(RED_HIT))
+                        self.bullet_list.remove(bullet)
+
+            case 'red':
+                for bullet in self.bullet_list:
+                    bullet.x -= self.bullet_speed
+                    if bullet.x < 0:
+                        self.bullet_list.remove(bullet)
+
+                    if self.window.dependencies['yellow_spaceship'].yellow.colliderect(bullet):
+                        pygame.event.post(pygame.event.Event(YELLOW_HIT))
+                        self.bullet_list.remove(bullet)
 
 
 class Window:
@@ -100,7 +127,6 @@ class Window:
 
         self.background = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.png')), (self.width, self.height))
 
-        self.bullet_speed = 8
         self.fps = 60
         self.winner_text = ""
 
@@ -199,31 +225,14 @@ class Window:
 
             self.dependencies['red_spaceship'].handle_movement(keys_pressed)
             self.dependencies['yellow_spaceship'].handle_movement(keys_pressed)
-            self.handle_bullets()
+
+            self.dependencies['red_spaceship'].handle_bullets()
+            self.dependencies['yellow_spaceship'].handle_bullets()
 
             self.draw_window()
 
     def add_dependencies(self, dependency_name: str, dependency: object):
         self.dependencies.update({dependency_name: dependency})
-
-    def handle_bullets(self):
-        for bullet in self.dependencies['yellow_spaceship'].bullet_list:
-            bullet.x += self.bullet_speed
-            if bullet.x > self.width:
-                self.dependencies['yellow_spaceship'].bullet_list.remove(bullet)
-
-            if self.dependencies['red_spaceship'].red.colliderect(bullet):
-                pygame.event.post(pygame.event.Event(RED_HIT))
-                self.dependencies['yellow_spaceship'].bullet_list.remove(bullet)
-
-        for bullet in self.dependencies['red_spaceship'].bullet_list:
-            bullet.x -= self.bullet_speed
-            if bullet.x < 0:
-                self.dependencies['red_spaceship'].bullet_list.remove(bullet)
-
-            if self.dependencies['yellow_spaceship'].yellow.colliderect(bullet):
-                pygame.event.post(pygame.event.Event(YELLOW_HIT))
-                self.dependencies['red_spaceship'].bullet_list.remove(bullet)
 
 
 new_window = Window(900, 500, 'Naves são demais')
